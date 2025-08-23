@@ -5,7 +5,7 @@ import Cell from "./Cell";
 const DIFFICULTY = {
   easy: { rows: 10, cols: 10, mines: 10, cellSize: 35 },
   medium: { rows: 15, cols: 15, mines: 30, cellSize: 20 },
-  hard: { rows: 20, cols: 20, mines: 100, cellSize: 18 },
+  hard: { rows: 20, cols: 20, mines: 90, cellSize: 18 },
 };
 
 function Board({ difficulty = "easy", setGameStatus: setParentGameStatus }) {
