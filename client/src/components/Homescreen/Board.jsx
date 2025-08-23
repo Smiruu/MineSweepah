@@ -3,21 +3,27 @@ import { generateBoard, revealEmpty } from "../../utils";
 import Cell from "./Cell";
 
 const DIFFICULTY = {
-  easy: { rows: 10, cols: 10, mines: 10 },
-  medium: { rows: 20, cols: 20, mines: 40 },
-  hard: { rows: 50, cols: 50, mines: 100 },
+  easy: { rows: 10, cols: 10, mines: 10, cellSize: 35 },
+  medium: { rows: 15, cols: 15, mines: 30, cellSize: 20 },
+  hard: { rows: 20, cols: 20, mines: 100, cellSize: 18 },
 };
 
 function Board({ difficulty = "easy", setGameStatus: setParentGameStatus }) {
-  const { rows, cols, mines } = DIFFICULTY[difficulty];
+  const { rows, cols, mines, cellSize } = DIFFICULTY[difficulty];
   const [board, setBoard] = useState(() => generateBoard(rows, cols, mines));
-  const [gameStatus, setGameStatus] = useState("playing"); // playing, won, lost
+  const [gameStatus, setGameStatus] = useState("playing");
   const [flaggedCount, setFlaggedCount] = useState(0);
 
-  // Notify parent of game status
   useEffect(() => {
     if (setParentGameStatus) setParentGameStatus(gameStatus);
   }, [gameStatus]);
+
+  const revealAllMines = (b) => {
+    const newBoard = b.map(row =>
+      row.map(cell => (cell.mine ? { ...cell, revealed: true, highlight: true } : cell))
+    );
+    setBoard(newBoard);
+  };
 
   const checkWinCondition = (b) => {
     const allSafeRevealed = b.every(row =>
@@ -42,6 +48,7 @@ function Board({ difficulty = "easy", setGameStatus: setParentGameStatus }) {
       cell.revealed = true;
       setBoard(newBoard);
       setGameStatus("lost");
+      revealAllMines(newBoard);
       console.log("💥 Game Over! You clicked a mine.");
       return;
     }
@@ -84,21 +91,31 @@ function Board({ difficulty = "easy", setGameStatus: setParentGameStatus }) {
       </h4>
 
       <div
-        className="grid gap-1 bg-gray-700 rounded-sm p-2"
-        style={{ gridTemplateColumns: `repeat(${cols}, 2rem)` }}
+        className="grid  gap-1 bg-gray-700 rounded-sm p-2 w-full"
+        style={{
+          gridTemplateColumns: `repeat(${cols}, ${cellSize}px)`,
+        }}
       >
         {board.map((row, rIdx) =>
           row.map((cell, cIdx) => (
-            <div key={`${rIdx}-${cIdx}`} className="relative w-8 h-8">
-              {/* Show the true value underneath */}
-              <div className="absolute inset-0 flex items-center justify-center text-xs bg-gray-200 text-black">
+            <div
+              key={`${rIdx}-${cIdx}`}
+              className="relative"
+              style={{ width: `${cellSize}px`, height: `${cellSize}px` }}
+            >
+              <div
+                className={`absolute inset-0 flex items-center justify-center text-base bg-gray-200 text-black ${
+                  cell.highlight ? "bg-red-400 text-white font-bold" : ""
+                }`}
+              >
                 {cell.mine ? "💣" : cell.adjacent > 0 ? cell.adjacent : ""}
               </div>
 
-              {/* Overlay cell */}
               <Cell
                 revealed={cell.revealed}
                 flagged={cell.flagged}
+                  rIdx={rIdx}
+  cIdx={cIdx} 
                 onLeftClick={() => handleLeftClick(rIdx, cIdx)}
                 onRightClick={() => handleRightClick(rIdx, cIdx)}
               />
