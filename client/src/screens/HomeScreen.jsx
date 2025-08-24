@@ -15,6 +15,7 @@ function HomeScreen() {
 
   return (
     <div className="flex flex-col items-center gap-4 mt-4">
+      <h1 className="font-bold text-xl">MINESWEEPAH</h1>
       <Board
         key={boardKey} // force re-render for new board
         difficulty={difficulty}

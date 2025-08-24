@@ -13,33 +13,46 @@ function Board({ difficulty = "easy", setGameStatus: setParentGameStatus }) {
   const [board, setBoard] = useState(() => generateBoard(rows, cols, mines));
   const [gameStatus, setGameStatus] = useState("playing");
   const [flaggedCount, setFlaggedCount] = useState(0);
+  const [time, setTime] =  useState(0);
+  const [timerStarted, setTimerStarted] = useState(0)
 
   useEffect(() => {
     if (setParentGameStatus) setParentGameStatus(gameStatus);
   }, [gameStatus]);
 
+  useEffect(()=>{
+    let timer;
+    if (timerStarted & gameStatus === "playing"){
+      timer = setInterval(() => setTime((prev) => prev +1), 1000);
+    }
+
+    return () => clearInterval(timer);
+  }, [timerStarted, gameStatus])
+
   const revealAllMines = (b) => {
-    const newBoard = b.map(row =>
-      row.map(cell => (cell.mine ? { ...cell, revealed: true, highlight: true } : cell))
+    const newBoard = b.map((row) =>
+      row.map((cell) =>
+        cell.mine ? { ...cell, revealed: true, highlight: true } : cell
+      )
     );
     setBoard(newBoard);
   };
 
   const checkWinCondition = (b) => {
-    const allSafeRevealed = b.every(row =>
-      row.every(cell => (cell.mine ? true : cell.revealed))
+    const allSafeRevealed = b.every((row) =>
+      row.every((cell) => (cell.mine ? true : cell.revealed))
     );
 
     if (allSafeRevealed) {
       setGameStatus("won");
-      console.log("🎉 You Win! All safe cells revealed.");
     }
   };
 
   const handleLeftClick = (rIdx, cIdx) => {
     if (gameStatus !== "playing") return;
+    if (!timerStarted) setTimerStarted(true);
 
-    const newBoard = board.map(row => row.map(cell => ({ ...cell })));
+    const newBoard = board.map((row) => row.map((cell) => ({ ...cell })));
     const cell = newBoard[rIdx][cIdx];
 
     if (cell.revealed || cell.flagged) return;
@@ -49,16 +62,14 @@ function Board({ difficulty = "easy", setGameStatus: setParentGameStatus }) {
       setBoard(newBoard);
       setGameStatus("lost");
       revealAllMines(newBoard);
-      console.log("💥 Game Over! You clicked a mine.");
+
       return;
     }
 
     if (cell.adjacent === 0) {
       revealEmpty(newBoard, rows, cols, rIdx, cIdx);
-      console.log("Empty");
     } else {
       cell.revealed = true;
-      console.log(cell.adjacent);
     }
 
     setBoard(newBoard);
@@ -68,19 +79,27 @@ function Board({ difficulty = "easy", setGameStatus: setParentGameStatus }) {
   const handleRightClick = (rIdx, cIdx) => {
     if (gameStatus !== "playing") return;
 
-    const newBoard = board.map(row => row.map(cell => ({ ...cell })));
+    const newBoard = board.map((row) => row.map((cell) => ({ ...cell })));
     const cell = newBoard[rIdx][cIdx];
 
     if (cell.revealed) return;
 
     cell.flagged = !cell.flagged;
-    setFlaggedCount(prev => prev + (cell.flagged ? 1 : -1));
+    setFlaggedCount((prev) => prev + (cell.flagged ? 1 : -1));
     setBoard(newBoard);
   };
 
+  const formatTime = (seconds) => {
+    const m = Math.floor(seconds / 60).toString().padStart(2, "0");
+    const s = (seconds % 60).toString().padStart(2, "0");
+    return `${m}:${s}`;
+  };
   return (
     <div className="flex flex-col items-center gap-4">
-      <h3 className="text-lg font-bold">Flags Remaining: {mines - flaggedCount}</h3>
+      <h3 className="text-lg font-bold">
+        Flags Remaining: {mines - flaggedCount}
+      </h3>
+      <h3 className="text-lg font-bold">⏱️{formatTime(time)}</h3>
       <h4 className="text-md font-semibold">
         Status:{" "}
         {gameStatus === "playing"
@@ -91,7 +110,7 @@ function Board({ difficulty = "easy", setGameStatus: setParentGameStatus }) {
       </h4>
 
       <div
-        className="grid  gap-1 bg-gray-700 rounded-sm p-2 w-full"
+        className="grid gap-1 bg-gray-700 rounded-sm p-2 w-full"
         style={{
           gridTemplateColumns: `repeat(${cols}, ${cellSize}px)`,
         }}
@@ -104,18 +123,18 @@ function Board({ difficulty = "easy", setGameStatus: setParentGameStatus }) {
               style={{ width: `${cellSize}px`, height: `${cellSize}px` }}
             >
               <div
-                className={`absolute inset-0 flex items-center justify-center text-base bg-gray-200 text-black ${
+                className={`absolute inset-0 flex items-center justify-center text-base bg-gray-200 text-black rounded-sm
+                  ${
                   cell.highlight ? "bg-red-400 text-white font-bold" : ""
                 }`}
               >
                 {cell.mine ? "💣" : cell.adjacent > 0 ? cell.adjacent : ""}
               </div>
-
               <Cell
                 revealed={cell.revealed}
                 flagged={cell.flagged}
-                  rIdx={rIdx}
-  cIdx={cIdx} 
+                rIdx={rIdx}
+                cIdx={cIdx}
                 onLeftClick={() => handleLeftClick(rIdx, cIdx)}
                 onRightClick={() => handleRightClick(rIdx, cIdx)}
               />
