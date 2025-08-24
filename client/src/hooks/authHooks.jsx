@@ -24,7 +24,7 @@ export const useAuth = () => {
     setError(null);
 
     try {
-      const res = await API.post("/signup", { username, email, password });
+      const res = await API.post("/api/auth/signup", { username, email, password });
 
       if (res.data?.user) {
         setUser(res.data.user);
@@ -47,7 +47,7 @@ export const useAuth = () => {
 
     console.log(identifier)
     try {
-      const res = await API.post("/login", { identifier, password });
+      const res = await API.post("/api/auth/login", { identifier, password });
 
       
       if (res.data?.session?.access_token) {
@@ -74,7 +74,7 @@ export const useAuth = () => {
     setError(null);
 
     try {
-      await API.post("/logout");
+      await API.post("/api/auth/logout");
       localStorage.removeItem("access_token");
       localStorage.removeItem("user");
       setUser(null);
