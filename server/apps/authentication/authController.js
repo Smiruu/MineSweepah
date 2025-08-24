@@ -32,10 +32,11 @@ class AuthController {
   static userLogin = async (req,res) => {
 
     const {identifier, password} = req.body;
-
+    
 
     try {
         let emailToUse = identifier;    
+        console.log(identifier)
         //if user input username
         if(!identifier.includes("@")){
             const {data, error} = await supabase
@@ -43,7 +44,7 @@ class AuthController {
             .select("email")
             .eq("username", identifier)
             .single();
-
+            console.log("Supabase query result:", { data, error });
             if (error|| !data) throw new Error("Invalid Username")
             emailToUse = data.email
         }
@@ -58,8 +59,17 @@ class AuthController {
     } catch (error) {
         res.status(400).json({ error: error.message || error });
     }
-
   }
+    static userLogout = async (req, res) => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+
+      res.status(200).json({ message: "Logged out successfully!" });
+    } catch (error) {
+      res.status(400).json({ error: error.message || error });
+    }
+  };
 }
 
 export default AuthController;

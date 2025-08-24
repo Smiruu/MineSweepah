@@ -1,20 +1,21 @@
-import { useState } from 'react'
-import { BrowserRouter as Router, Route, Routes} from 'react-router-dom'
-import './App.css'
-import HomeScreen from './screens/HomeScreen'
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import "./App.css";
+import HomeScreen from "./screens/HomeScreen";
+import LoginScreen from "./screens/LoginScreen";
+import RegisterScreen from "./screens/RegisterScreen";
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
+    <div className="app-bg flex items-center justify-center">
       <Router>
         <Routes>
-          <Route path="/" element={<HomeScreen />} />
+          <Route path="/home" element={<HomeScreen />} />
+          <Route path="/" element={<LoginScreen />} />
+          <Route path="/register" element={<RegisterScreen />} />
         </Routes>
       </Router>
-    </>
-  )
+    </div>
+  );
 }
 
-export default App
+export default App;

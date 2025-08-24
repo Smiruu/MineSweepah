@@ -1,7 +1,36 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+:root{
+  --tile: 44px;                 /* grid cell size */
+  --grid: rgba(255,255,255,.07);
+  --bg: #0b1420;                /* deep slate-blue */
 }
 
+/* Full-viewport background */
+.app-bg{
+  position: relative;
+  min-height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+/* Grid lines */
+.app-bg::before{
+  content:"";
+  position:absolute; inset:0;
+  background-image:
+    linear-gradient(to right, var(--grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+  background-size: var(--tile) var(--tile), var(--tile) var(--tile);
+  pointer-events:none;
+}
+
+/* Soft colored glows for depth */
+.app-bg::after{
+  content:"";
+  position:absolute; inset:0;
+  background:
+    radial-gradient(800px 800px at 15% 25%, rgba(34,197,94,.14), transparent 60%),
+    radial-gradient(900px 900px at 85% 75%, rgba(59,130,246,.14), transparent 60%);
+  pointer-events:none;
+  mix-blend-mode: screen;
+}
