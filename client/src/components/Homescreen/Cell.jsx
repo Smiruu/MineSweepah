@@ -16,7 +16,7 @@ function Cell({ revealed, flagged, onLeftClick, onRightClick }) {
 
   return (
     <div
-      className={`absolute inset-0 flex items-center justify-center cursor-pointer rounded-sm 
+      className={`absolute inset-0 flex items-center justify-center cursor-pointer rounded-sm opacity-90
         ${revealed ? "bg-transparent" : "bg-gray-400 hover:bg-gray-500 "}`}
       onClick={onLeftClick}               // tap = reveal
       onTouchStart={handleTouchStart}     // start counting for long press

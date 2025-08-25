@@ -1,15 +1,67 @@
-    // directions to check neighbors
-  const DIRECTIONS = [
-    [-1, -1],
-    [-1, 0],
-    [-1, 1],
-    [0, -1],
-    [0, 1],
-    [1, -1],
-    [1, 0],
-    [1, 1],
-  ];
+// directions to check neighbors
+const DIRECTIONS = [
+  [-1, -1],
+  [-1, 0],
+  [-1, 1],
+  [0, -1],
+  [0, 1],
+  [1, -1],
+  [1, 0],
+  [1, 1],
+];
 
+// export function generateBoard(rows, cols, mines) {
+//   const board = Array.from({ length: rows }, () =>
+//     Array.from({ length: cols }, () => ({
+//       revealed: false,
+//       flagged: false,
+//       mine: false,
+//       adjacent: 0,
+//     }))
+//   );
+
+//   // Fixed mine positions for testing (row, col)
+//   const minePositions = [
+//     [0, 0],
+//     [1, 0],
+//     [2, 0],
+//     [3, 0],
+//     [4, 0],
+//     [5, 0],
+//     [6, 0],
+//     [7, 0],
+//     [8, 0],
+//     [9, 0],
+//   ];
+
+//   // Place mines at fixed positions
+//   minePositions.slice(0, mines).forEach(([r, c]) => {
+//     board[r][c].mine = true;
+//   });
+
+//   // calculate adjacent mine counts
+//   const DIRECTIONS = [
+//     [-1, -1], [-1, 0], [-1, 1],
+//     [0, -1],          [0, 1],
+//     [1, -1], [1, 0], [1, 1],
+//   ];
+
+//   for (let r = 0; r < rows; r++) {
+//     for (let c = 0; c < cols; c++) {
+//       if (board[r][c].mine) continue;
+//       let count = 0;
+//       for (let [dr, dc] of DIRECTIONS) {
+//         const nr = r + dr, nc = c + dc;
+//         if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && board[nr][nc].mine) {
+//           count++;
+//         }
+//       }
+//       board[r][c].adjacent = count;
+//     }
+//   }
+
+//   return board;
+// }
 export function generateBoard(rows, cols, mines) {
   // initialize the board
   const board = Array.from({ length: rows }, () =>
@@ -32,24 +84,14 @@ export function generateBoard(rows, cols, mines) {
     }
   }
 
-
-
-
   // calculate adjacent mine counts
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
-      if (board[r][c].mine) continue; // skip if it's a mine
+      if (board[r][c].mine) continue;
       let count = 0;
       for (let [dr, dc] of DIRECTIONS) {
-        const nr = r + dr,
-          nc = c + dc;
-        if (
-          nr >= 0 &&
-          nr < rows &&
-          nc >= 0 &&
-          nc < cols &&
-          board[nr][nc].mine
-        ) {
+        const nr = r + dr, nc = c + dc;
+        if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && board[nr][nc].mine) {
           count++;
         }
       }
@@ -68,7 +110,6 @@ export function revealEmpty(board, rows, cols, row, col) {
     const cell = board[currentRow][currentCol];
 
     if (cell.revealed) continue;
-
     cell.revealed = true;
 
     if (cell.adjacent === 0 && !cell.mine) {
@@ -91,4 +132,19 @@ export function revealEmpty(board, rows, cols, row, col) {
   }
 
   return board;
+}
+
+export function revealAllMines(board) {
+  return board.map((row) =>
+    row.map((cell) =>
+      cell.mine ? { ...cell, revealed: true, highlight: true } : cell
+    )
+  );
+}
+
+
+export function formatTime(seconds) {
+  const m = Math.floor(seconds / 60).toString().padStart(2, "0");
+  const s = (seconds % 60).toString().padStart(2, "0");
+  return `${m}:${s}`;
 }

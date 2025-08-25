@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { generateBoard, revealEmpty } from "../../utils";
+import { generateBoard, revealEmpty, revealAllMines, formatTime } from "../../utils";
 import Cell from "./Cell";
+
+import { useSubmitScore } from "../../hooks/scoreHooks";
 
 const DIFFICULTY = {
   easy: { rows: 10, cols: 10, mines: 10, cellSize: 35 },
@@ -28,15 +30,7 @@ function Board({ difficulty = "easy", setGameStatus: setParentGameStatus }) {
     return () => clearInterval(timer);
   }, [timerStarted, gameStatus]);
 
-  const revealAllMines = (b) => {
-    const newBoard = b.map((row) =>
-      row.map((cell) =>
-        cell.mine ? { ...cell, revealed: true, highlight: true } : cell
-      )
-    );
-    setBoard(newBoard);
-  };
-
+  // Win condition: all mines flagged, all safe cells revealed
   const checkWinCondition = (b) => {
     const allSafeRevealed = b.every((row) =>
       row.every((cell) => (cell.mine ? true : cell.revealed))
@@ -45,6 +39,7 @@ function Board({ difficulty = "easy", setGameStatus: setParentGameStatus }) {
       setGameStatus("won");
     }
   };
+
 
   const handleLeftClick = (rIdx, cIdx) => {
     if (gameStatus !== "playing") return;
@@ -59,7 +54,7 @@ function Board({ difficulty = "easy", setGameStatus: setParentGameStatus }) {
       cell.revealed = true;
       setBoard(newBoard);
       setGameStatus("lost");
-      revealAllMines(newBoard);
+      setBoard(revealAllMines(newBoard));
       return;
     }
 
@@ -86,12 +81,11 @@ function Board({ difficulty = "easy", setGameStatus: setParentGameStatus }) {
     setBoard(newBoard);
   };
 
-  const formatTime = (seconds) => {
-    const m = Math.floor(seconds / 60).toString().padStart(2, "0");
-    const s = (seconds % 60).toString().padStart(2, "0");
-    return `${m}:${s}`;
-  };
 
+  const { loading: scoreLoading, error: scoreError } = useSubmitScore(time, gameStatus, difficulty);
+
+  // Optionally display score submission error
+  if (scoreError) console.log("Score error:", scoreError);
   return (
     <div className="flex flex-col items-center gap-4 text-white">
       {/* Header Info */}
@@ -122,9 +116,7 @@ function Board({ difficulty = "easy", setGameStatus: setParentGameStatus }) {
       {/* Game Board */}
       <div
         className="grid gap-1 bg-gray-900 rounded-lg p-3 shadow-xl border border-gray-700"
-        style={{
-          gridTemplateColumns: `repeat(${cols}, ${cellSize}px)`,
-        }}
+        style={{ gridTemplateColumns: `repeat(${cols}, ${cellSize}px)` }}
       >
         {board.map((row, rIdx) =>
           row.map((cell, cIdx) => (
@@ -133,23 +125,16 @@ function Board({ difficulty = "easy", setGameStatus: setParentGameStatus }) {
               className="relative"
               style={{ width: `${cellSize}px`, height: `${cellSize}px` }}
             >
-              {/* Revealed Cell */}
               {cell.revealed && (
                 <div
                   className={`absolute inset-0 flex items-center justify-center font-bold text-sm rounded-md
-                    ${
-                      cell.mine
-                        ? "bg-red-600 text-white"
-                        : "bg-gray-800 text-green-400"
-                    }
-                    ${cell.highlight ? "animate-pulse" : ""}
-                  `}
+                    ${cell.mine ? "bg-red-600 text-white" : "bg-gray-800 text-green-400"}
+                    ${cell.highlight ? "animate-pulse" : ""}`}
                 >
                   {cell.mine ? "💣" : cell.adjacent > 0 ? cell.adjacent : ""}
                 </div>
               )}
 
-              {/* Hidden Cell Overlay */}
               <Cell
                 revealed={cell.revealed}
                 flagged={cell.flagged}
