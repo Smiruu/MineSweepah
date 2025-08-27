@@ -50,7 +50,7 @@ function LoginForm() {
 
       <p className="text-center text-sm text-gray-400">
         Don’t have an account?{" "}
-        <a href="/register" className="text-green-400 font-semibold hover:underline">
+        <a href="/signup" className="text-green-400 font-semibold hover:underline">
           Sign up
         </a>
       </p>
