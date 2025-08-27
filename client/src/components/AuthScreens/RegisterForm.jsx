@@ -26,7 +26,7 @@ function RegisterForm() {
   // Redirect when registered
   useEffect(() => {
     if (user) {
-      navigate("/login");
+      navigate("/");
     }
   }, [user, navigate]);
 
@@ -80,7 +80,7 @@ function RegisterForm() {
 
       <p className="text-center text-sm text-gray-400">
         Already have an account?{" "}
-        <a href="/login" className="text-green-400 font-semibold hover:underline">
+        <a href="/" className="text-green-400 font-semibold hover:underline">
           Login
         </a>
       </p>
