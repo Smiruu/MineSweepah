@@ -9,7 +9,6 @@ class ScoresController {
     const user_id = req.user.id; 
 
 
-        console.log(user_id, time, difficulty)
       if (!user_id || !time || !difficulty) {
         return res
           .status(400)
@@ -88,7 +87,8 @@ class ScoresController {
   // Get user’s best score (per difficulty)
   static getUserHighScore = async (req, res) => {
     try {
-      const { user_id, difficulty } = req.query;
+      const { difficulty } = req.query;
+      const user_id =  req.user.id;
 
       if (!user_id || !difficulty) {
         return res

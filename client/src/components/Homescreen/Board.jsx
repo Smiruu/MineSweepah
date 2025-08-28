@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { generateBoard, revealEmpty, revealAllMines, formatTime } from "../../utils";
 import Cell from "./Cell";
 
-import { useSubmitScore } from "../../hooks/scoreHooks";
+import {  useSubmitScore } from "../../hooks/scoreHooks";
+
 
 const DIFFICULTY = {
   easy: { rows: 10, cols: 10, mines: 10, cellSize: 35 },
@@ -17,6 +18,7 @@ function Board({ difficulty = "easy", setGameStatus: setParentGameStatus }) {
   const [flaggedCount, setFlaggedCount] = useState(0);
   const [time, setTime] = useState(0);
   const [timerStarted, setTimerStarted] = useState(false);
+  const [highScore, setHighScore] = useState(0)
 
   useEffect(() => {
     if (setParentGameStatus) setParentGameStatus(gameStatus);
@@ -31,14 +33,18 @@ function Board({ difficulty = "easy", setGameStatus: setParentGameStatus }) {
   }, [timerStarted, gameStatus]);
 
   // Win condition: all mines flagged, all safe cells revealed
-  const checkWinCondition = (b) => {
-    const allSafeRevealed = b.every((row) =>
-      row.every((cell) => (cell.mine ? true : cell.revealed))
-    );
-    if (allSafeRevealed) {
-      setGameStatus("won");
-    }
-  };
+const checkWinCondition = (b) => {
+  const allSafeRevealed = b.every((row) =>
+    row.every((cell) => (cell.mine ? true : cell.revealed))
+  );
+  const allMinesFlagged = b.every((row) =>
+    row.every((cell) => (cell.mine ? cell.flagged : true))
+  );
+  if (allSafeRevealed && allMinesFlagged) {
+    setGameStatus("won");
+
+  }
+};
 
 
   const handleLeftClick = (rIdx, cIdx) => {
@@ -79,10 +85,12 @@ function Board({ difficulty = "easy", setGameStatus: setParentGameStatus }) {
     cell.flagged = !cell.flagged;
     setFlaggedCount((prev) => prev + (cell.flagged ? 1 : -1));
     setBoard(newBoard);
+    checkWinCondition(newBoard);
   };
 
 
   const { loading: scoreLoading, error: scoreError } = useSubmitScore(time, gameStatus, difficulty);
+  
 
   // Optionally display score submission error
   if (scoreError) console.log("Score error:", scoreError);

@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect} from "react";
 import Board from "../components/Homescreen/Board";
 import Navbar from "../components/Navbar";
+import { getHighScore } from "../hooks/scoreHooks";
 
 const DIFFICULTY_OPTIONS = ["easy", "medium", "hard"];
 
@@ -8,11 +9,26 @@ function HomeScreen() {
   const [difficulty, setDifficulty] = useState("easy");
   const [boardKey, setBoardKey] = useState(0);
   const [gameStatus, setGameStatus] = useState("playing");
+  const [highScore, setHighScore] = useState(0);
 
   const handlePlayAgain = () => {
     setBoardKey(prev => prev + 1);
     setGameStatus("playing");
   };
+
+  useEffect( ()=> {
+    const fetchHighScore= async() => {
+      try {
+            const { score } = await getHighScore("easy");
+            console.log("User high score:", score);
+            // optionally set it in state
+            setHighScore(score);
+          } catch (err) {
+            console.error(err.message);
+          }
+  }
+    fetchHighScore();
+  },[]) 
 
   return (
     <div className="flex flex-col items-center gap-6">

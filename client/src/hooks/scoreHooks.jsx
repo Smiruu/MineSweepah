@@ -19,7 +19,6 @@ export const useSubmitScore = (time, gameStatus, difficulty = "easy") => {
 
       try {
         const token = localStorage.getItem("access_token");
-        console.log(token)
         const res = await API.post(
           "/api/scores/highscore",
           { time, difficulty },
@@ -41,3 +40,18 @@ export const useSubmitScore = (time, gameStatus, difficulty = "easy") => {
 
   return { loading, error, submitted };
 };
+
+export const getHighScore = async(difficulty) => {
+  try {
+    const token = localStorage.getItem("access_token");
+    const response = await API.get("/api/scores/user-score", 
+      {
+        params: {difficulty},
+        headers: {Authorization: `Bearer ${token}`}
+      }
+    );
+    return response.data
+  } catch (err) {
+    throw new Error(err?.response?.data?.error || "Failed to get High Score")
+  }
+}
