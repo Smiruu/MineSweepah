@@ -5,7 +5,7 @@ class ScoresController {
   static upsertScore = async (req, res) => {
     try {
 
-      const { time, difficulty } = req.body;
+    const { time, difficulty } = req.body;
     const user_id = req.user.id; 
 
 

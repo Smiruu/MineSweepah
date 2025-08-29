@@ -34,6 +34,7 @@ function HomeScreen() {
     <div className="flex flex-col items-center gap-6">
       {/* Navbar */}
       <Navbar />
+      <h1>HighScore: {highScore}</h1>
 
       {/* Minesweeper Board */}
       <Board
