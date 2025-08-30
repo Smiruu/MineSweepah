@@ -52,7 +52,11 @@ export const getHighScore = async(difficulty) => {
     );
     return response.data
   } catch (err) {
-    throw new Error(err?.response?.data?.error || "Failed to get High Score")
+    if (err.response?.status === 404) {
+      // return default high score of 0
+      return { score: { high_score: 0 } };
+    }
+    throw new Error(err?.response?.data?.error || "Failed to get High Score");
   }
 }
 
@@ -65,8 +69,10 @@ export const getLeaderboard = async(difficulty) => {
         headers: {Authorization: `Bearer ${token}`}
       }
     );
+    console.log(response.data)
     return response.data
   } catch(err){
+    
     throw new Error(err?.response?.data?.error || "Failed to get Leaderboard")
   }
 }

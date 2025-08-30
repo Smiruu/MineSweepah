@@ -71,7 +71,7 @@ class ScoresController {
 
       const { data: leaderboard, error: leaderboardError } = await supabase
         .from("scores")
-        .select("user_id, high_score, updated_at")
+        .select("user_id, high_score, updated_at, profiles(username)" )
         .eq("difficulty", difficulty)
         .order("high_score", { ascending: false })
         .limit(10);
@@ -88,7 +88,7 @@ class ScoresController {
           //fetch user's score
           const {data:userScore, error: userError} = await supabase
           .from("scores")//identify table
-          .select("user_id", "high_score", "updated_at")//select columns
+          .select("user_id, high_score,updated_at, profiles(username)")//select columns
           .eq("difficulty", difficulty)// equal to difficulty
           .eq("user_id", user_id)//equal to user
           .single();//return only one row

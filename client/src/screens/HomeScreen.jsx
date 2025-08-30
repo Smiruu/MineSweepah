@@ -1,7 +1,8 @@
 import React, { useState, useEffect} from "react";
 import Board from "../components/Homescreen/Board";
 import Navbar from "../components/Navbar";
-import { getHighScore } from "../hooks/scoreHooks";
+import { getHighScore, getLeaderboard } from "../hooks/scoreHooks";
+
 
 const DIFFICULTY_OPTIONS = ["easy", "medium", "hard"];
 
@@ -10,6 +11,7 @@ function HomeScreen() {
   const [boardKey, setBoardKey] = useState(0);
   const [gameStatus, setGameStatus] = useState("playing");
   const [highScore, setHighScore] = useState(0);
+  const [leaderboard, setLeaderboard]= useState([]);
 
   const handlePlayAgain = () => {
     setBoardKey(prev => prev + 1);
@@ -19,16 +21,27 @@ function HomeScreen() {
   useEffect( ()=> {
     const fetchHighScore= async() => {
       try {
-            const { score } = await getHighScore("easy");
-            console.log("User high score:", score);
+            const data  = await getHighScore(difficulty);
+            console.log("User high score:", data.score.high_score);
             // optionally set it in state
-            setHighScore(score);
+            setHighScore(data.score.high_score);
           } catch (err) {
             console.error(err.message);
           }
   }
+    
+
+    const fetchLeaderboard = async() => {
+      try {
+          const leaderboard= await getLeaderboard(difficulty);
+          setLeaderboard(leaderboard.leaderboard);
+      } catch (err) {
+        console.error(err.message)
+      }
+    }
     fetchHighScore();
-  },[]) 
+    fetchLeaderboard();
+  },[difficulty]) 
 
   return (
     <div className="flex flex-col items-center gap-6">
@@ -84,6 +97,19 @@ function HomeScreen() {
           </button>
         ))}
       </div>
+      <div className="mt-4">
+  <h2 className="text-lg font-bold">Leaderboard</h2>
+  <ul>
+    {leaderboard.map((entry, index) => (
+      <li key={entry.user_id}>
+        #{index + 1} — {entry.profiles.username} — {entry.high_score} 
+        <span className="text-gray-500 text-sm">
+          ({new Date(entry.updated_at).toLocaleString()})
+        </span>
+      </li>
+    ))}
+  </ul>
+</div>
     </div>
   );
 }
