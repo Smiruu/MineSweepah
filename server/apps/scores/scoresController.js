@@ -64,20 +64,56 @@ class ScoresController {
   static getLeaderboard = async (req, res) => {
     try {
       const { difficulty } = req.query;
+      const user_id =  req.user.id
       if (!difficulty) {
         return res.status(400).json({ error: "difficulty is required" });
       }
 
-      const { data, error } = await supabase
+      const { data: leaderboard, error: leaderboardError } = await supabase
         .from("scores")
         .select("user_id, high_score, updated_at")
         .eq("difficulty", difficulty)
-        .order("high_score", { ascending: true })
+        .order("high_score", { ascending: false })
         .limit(10);
 
-      if (error) throw error;
+      if (leaderboardError) throw leaderboardError;
 
-      return res.status(200).json({ leaderboard: data });
+      let userEntry = null;
+
+      if(user_id) {
+        
+        const inTop10 = leaderboard.find((entry) => entry.user_id === user_id);
+
+        if(!inTop10){
+          //fetch user's score
+          const {data:userScore, error: userError} = await supabase
+          .from("scores")//identify table
+          .select("user_id", "high_score", "updated_at")//select columns
+          .eq("difficulty", difficulty)// equal to difficulty
+          .eq("user_id", user_id)//equal to user
+          .single();//return only one row
+
+          if(userError && userError.code !== "PGRST116") throw userError;
+
+          if(userScore){
+            //find user rank by counting higher score above theirs
+            const {count, error: countError} = await supabase
+            .from("scores")
+            .select("*", {count: "exact", head:true})
+            .eq("difficulty", difficulty)
+            .gt("high_score", userScore.high_score);
+            
+            if(countError) throw countError;
+
+            userEntry = {
+              ...userScore,
+              rank: count +1,
+            }
+          }
+        }
+      }
+
+      return res.status(200).json({ leaderboard, user: userEntry });
     } catch (err) {
       console.error("Error fetching leaderboard:", err.message);
       return res.status(500).json({ error: "Failed to fetch leaderboard" });

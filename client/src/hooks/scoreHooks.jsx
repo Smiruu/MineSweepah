@@ -55,3 +55,18 @@ export const getHighScore = async(difficulty) => {
     throw new Error(err?.response?.data?.error || "Failed to get High Score")
   }
 }
+
+export const getLeaderboard = async(difficulty) => {
+  try{
+    const token = localStorage.getItem("access_token");
+    const response = await API.get("/api/scores/leaderboard",
+      {
+        params:{difficulty},
+        headers: {Authorization: `Bearer ${token}`}
+      }
+    );
+    return response.data
+  } catch(err){
+    throw new Error(err?.response?.data?.error || "Failed to get Leaderboard")
+  }
+}
