@@ -19,7 +19,7 @@ class AuthController {
         const {data: profileData, error: profileError} = await supabase
         .from("profiles")
         .insert([{id: userId, username, email}]);
-
+        console.log("updated profiles")
             if (profileError) throw profileError;
 
     res.status(201).json({ message: "User signed up!", user: authData.user });
@@ -36,7 +36,7 @@ class AuthController {
 
     try {
         let emailToUse = identifier;    
-        console.log(identifier)
+     
         //if user input username
         if(!identifier.includes("@")){
             const {data, error} = await supabase

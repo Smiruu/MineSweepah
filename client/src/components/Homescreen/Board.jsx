@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { generateBoard, revealEmpty, revealAllMines, formatTime } from "../../utils";
+import { generateEmptyBoard, revealEmpty, revealAllMines, formatTime, placeMines} from "../../utils";
 import Cell from "./Cell";
 
 import {  useSubmitScore } from "../../hooks/scoreHooks";
@@ -8,17 +8,17 @@ import {  useSubmitScore } from "../../hooks/scoreHooks";
 const DIFFICULTY = {
   easy: { rows: 10, cols: 10, mines: 10, cellSize: 35 },
   medium: { rows: 15, cols: 15, mines: 30, cellSize: 28 },
-  hard: { rows: 20, cols: 20, mines: 90, cellSize: 24 },
+  hard: { rows: 24, cols: 20, mines: 90, cellSize: 24 },
 };
 
 function Board({ difficulty = "easy", setGameStatus: setParentGameStatus }) {
   const { rows, cols, mines, cellSize } = DIFFICULTY[difficulty];
-  const [board, setBoard] = useState(() => generateBoard(rows, cols, mines));
+  const [board, setBoard] = useState(() => generateEmptyBoard(rows, cols));
   const [gameStatus, setGameStatus] = useState("playing");
   const [flaggedCount, setFlaggedCount] = useState(0);
   const [time, setTime] = useState(0);
   const [timerStarted, setTimerStarted] = useState(false);
-  const [highScore, setHighScore] = useState(0)
+const [firstClickDone, setFirstClickDone] = useState(false);
 
   useEffect(() => {
     if (setParentGameStatus) setParentGameStatus(gameStatus);
@@ -47,32 +47,38 @@ const checkWinCondition = (b) => {
 };
 
 
-  const handleLeftClick = (rIdx, cIdx) => {
-    if (gameStatus !== "playing") return;
-    if (!timerStarted) setTimerStarted(true);
+const handleLeftClick = (rIdx, cIdx) => {
+  if (gameStatus !== "playing") return;
+  if (!timerStarted) setTimerStarted(true);
 
-    const newBoard = board.map((row) => row.map((cell) => ({ ...cell })));
-    const cell = newBoard[rIdx][cIdx];
+  let newBoard = board.map((row) => row.map((cell) => ({ ...cell })));
 
-    if (cell.revealed || cell.flagged) return;
+  // Place mines after first click
+  if (!firstClickDone) {
+    newBoard = placeMines(newBoard, rows, cols, mines, rIdx, cIdx);
+    setFirstClickDone(true);
+  }
 
-    if (cell.mine) {
-      cell.revealed = true;
-      setBoard(newBoard);
-      setGameStatus("lost");
-      setBoard(revealAllMines(newBoard));
-      return;
-    }
+  const cell = newBoard[rIdx][cIdx];
+  if (cell.revealed || cell.flagged) return;
 
-    if (cell.adjacent === 0) {
-      revealEmpty(newBoard, rows, cols, rIdx, cIdx);
-    } else {
-      cell.revealed = true;
-    }
-
+  if (cell.mine) {
+    cell.revealed = true;
     setBoard(newBoard);
-    checkWinCondition(newBoard);
-  };
+    setGameStatus("lost");
+    setBoard(revealAllMines(newBoard));
+    return;
+  }
+
+  if (cell.adjacent === 0) {
+    revealEmpty(newBoard, rows, cols, rIdx, cIdx);
+  } else {
+    cell.revealed = true;
+  }
+
+  setBoard(newBoard);
+  checkWinCondition(newBoard);
+};
 
   const handleRightClick = (rIdx, cIdx) => {
     if (gameStatus !== "playing") return;

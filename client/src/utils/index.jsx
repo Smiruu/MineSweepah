@@ -62,9 +62,8 @@ const DIRECTIONS = [
 
 //   return board;
 // }
-export function generateBoard(rows, cols, mines) {
-  // initialize the board
-  const board = Array.from({ length: rows }, () =>
+export function generateEmptyBoard(rows, cols) {
+  return Array.from({ length: rows }, () =>
     Array.from({ length: cols }, () => ({
       revealed: false,
       flagged: false,
@@ -72,22 +71,28 @@ export function generateBoard(rows, cols, mines) {
       adjacent: 0,
     }))
   );
+}
 
-  // randomly place mines
+export function placeMines(board, rows, cols, mines, safeRow, safeCol) {
   let placedMines = 0;
+
   while (placedMines < mines) {
     const r = Math.floor(Math.random() * rows);
     const c = Math.floor(Math.random() * cols);
-    if (!board[r][c].mine) {
-      board[r][c].mine = true;
-      placedMines++;
-    }
+
+    // avoid placing mine on first clicked cell
+    if (board[r][c].mine) continue;
+    if (r === safeRow && c === safeCol) continue;
+
+    board[r][c].mine = true;
+    placedMines++;
   }
 
-  // calculate adjacent mine counts
+  // calculate adjacent counts
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       if (board[r][c].mine) continue;
+
       let count = 0;
       for (let [dr, dc] of DIRECTIONS) {
         const nr = r + dr, nc = c + dc;

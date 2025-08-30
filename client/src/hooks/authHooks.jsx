@@ -26,11 +26,7 @@ export const useAuth = () => {
     try {
       const res = await API.post("/api/auth/signup", { username, email, password });
 
-      if (res.data?.user) {
-        setUser(res.data.user);
-        localStorage.setItem("user", JSON.stringify(res.data.user));
-      }
-
+      await login(email, password)
       return res.data;
     } catch (err) {
       setError(err.response?.data?.error || "Registration failed");
@@ -59,6 +55,7 @@ export const useAuth = () => {
         localStorage.setItem("user", JSON.stringify(res.data.session.user));
       }
 
+      navigate("/")
       return res.data;
     } catch (err) {
       setError(err.response?.data?.error || "Login failed");
@@ -78,7 +75,7 @@ export const useAuth = () => {
       localStorage.removeItem("access_token");
       localStorage.removeItem("user");
       setUser(null);
-      navigate("/")
+      navigate("/home")
     } catch (err) {
       setError(err.response?.data?.error || "Logout failed");
     } finally {

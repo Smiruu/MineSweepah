@@ -11,14 +11,18 @@ function LoginForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     await login(identifier, password);
+    navigate("/home")
   };
 
   // Redirect when logged in
   useEffect(() => {
-    if (user) {
-      navigate("/home");
-    }
-  }, [user, navigate]);
+  const access_token = localStorage.getItem("access_token")
+
+  if(access_token){
+    navigate("/home")
+  }
+
+  }, [navigate]);
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col space-y-5">
