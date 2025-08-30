@@ -11,7 +11,7 @@ function LoginForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     await login(identifier, password);
-    navigate("/home")
+    
   };
 
   // Redirect when logged in

@@ -55,7 +55,7 @@ export const useAuth = () => {
         localStorage.setItem("user", JSON.stringify(res.data.session.user));
       }
 
-      navigate("/")
+      navigate("/home")
       return res.data;
     } catch (err) {
       setError(err.response?.data?.error || "Login failed");
