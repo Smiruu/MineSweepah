@@ -75,14 +75,17 @@ export function generateEmptyBoard(rows, cols) {
 
 export function placeMines(board, rows, cols, mines, safeRow, safeCol) {
   let placedMines = 0;
+  const SAFE_RADIUS = 3; // 3 → makes 6x6 safe zone
 
   while (placedMines < mines) {
     const r = Math.floor(Math.random() * rows);
     const c = Math.floor(Math.random() * cols);
 
-    // avoid placing mine on first clicked cell
+    // avoid placing mine on already mined cell
     if (board[r][c].mine) continue;
-    if (r === safeRow && c === safeCol) continue;
+
+    // avoid placing mine in the "safe zone" (clicked cell + neighbors within radius)
+    if (Math.abs(r - safeRow) <= SAFE_RADIUS && Math.abs(c - safeCol) <= SAFE_RADIUS) continue;
 
     board[r][c].mine = true;
     placedMines++;
@@ -106,6 +109,7 @@ export function placeMines(board, rows, cols, mines, safeRow, safeCol) {
 
   return board;
 }
+
 
 export function revealEmpty(board, rows, cols, row, col) {
   const queue = [[row, col]];
