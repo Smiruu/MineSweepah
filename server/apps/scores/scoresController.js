@@ -80,13 +80,52 @@ static getLeaderboard = async (req, res) => {
     console.log(leaderboard)
     if (leaderboardError) throw leaderboardError;
 
+    let userEntry = null;
 
-    return res.status(200).json({ leaderboard});
+    if (user_id) {
+      // Fetch user's score (if it exists)
+      const { data: userScore, error: userError } = await supabase
+        .from("scores")
+        .select("user_id, high_score, updated_at, profiles(username)")
+        .eq("difficulty", difficulty)
+        .eq("user_id", user_id)
+        .maybeSingle();
+
+      if (userError) throw userError;
+
+      if (userScore) {
+        // Count how many users have a *better* score
+        const { count, error: countError } = await supabase
+          .from("scores")
+          .select("*", { count: "exact", head: true })
+          .eq("difficulty", difficulty)
+          .lt("high_score", userScore.high_score); // ✅ better scores have lower values
+
+        if (countError) throw countError;
+
+        userEntry = {
+          ...userScore,
+          rank: count + 1, // ✅ user’s rank
+        };
+      } else {
+        // ✅ New user with no score
+        userEntry = {
+          user_id,
+          profiles: { username: req.user.username || "You" },
+          high_score: 0,
+          updated_at: null,
+          rank: "unranked",
+        };
+      }
+    }
+
+    return res.status(200).json({ leaderboard, user: userEntry });
   } catch (err) {
     console.error("Error fetching leaderboard:", err.message);
     return res.status(500).json({ error: "Failed to fetch leaderboard" });
   }
 };
+
 
 
 

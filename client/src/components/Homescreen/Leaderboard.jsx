@@ -42,7 +42,7 @@ function Leaderboard({ difficulty, gameCycle }) {
                 <span>
                   #{index + 1} —{" "}
                   <span className="font-semibold">
-                    {isCurrentUser = "You"}
+                    {isCurrentUser ? "You" : entry.profiles?.username || "Anonymous"}
                   </span>
                 </span>
                 <span className="font-bold">{entry.high_score}</span>
