@@ -16,10 +16,9 @@ class AuthController {
         const userId = authData.user.id;
 
         //store username in profiles table
-        const {data: profileData, error: profileError} = await supabase
+        const {error: profileError} = await supabase
         .from("profiles")
         .insert([{id: userId, username, email}]);
-        console.log("updated profiles")
             if (profileError) throw profileError;
 
     res.status(201).json({ message: "User signed up!", user: authData.user });
