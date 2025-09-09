@@ -77,7 +77,6 @@ static getLeaderboard = async (req, res) => {
       .eq("difficulty", difficulty)
       .order("high_score", { ascending: true }) // ✅ lowest score = better rank
       .limit(10);
-    console.log(leaderboard)
     if (leaderboardError) throw leaderboardError;
 
     let userEntry = null;

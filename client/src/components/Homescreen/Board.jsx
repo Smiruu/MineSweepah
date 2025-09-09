@@ -11,7 +11,7 @@ const DIFFICULTY = {
   hard: { rows: 24, cols: 20, mines: 90, cellSize: 24 },
 };
 
-function Board({ difficulty = "easy", setGameStatus: setParentGameStatus }) {
+function Board({ difficulty = "easy", setGameStatus: setParentGameStatus, setTime: setParentTime}) {
   const { rows, cols, mines, cellSize } = DIFFICULTY[difficulty];
   const [board, setBoard] = useState(() => generateEmptyBoard(rows, cols));
   const [gameStatus, setGameStatus] = useState("playing");
@@ -42,7 +42,7 @@ const checkWinCondition = (b) => {
   );
   if (allSafeRevealed && allMinesFlagged) {
     setGameStatus("won");
-
+    setParentTime(time)
   }
 };
 
@@ -95,11 +95,8 @@ const handleLeftClick = (rIdx, cIdx) => {
   };
 
 
-  const { loading: scoreLoading, error: scoreError } = useSubmitScore(time, gameStatus, difficulty);
   
 
-  // Optionally display score submission error
-  if (scoreError) console.log("Score error:", scoreError);
   return (
     <div className="flex flex-col items-center gap-4 text-white">
       {/* Header Info */}

@@ -8,9 +8,9 @@ const API = axios.create({
 export const useSubmitScore = async(time, gameStatus, difficulty ) => {
   try {
     const token = localStorage.getItem("access_token")
-    await API.post("/api/scores/highscore",
+    console.log(token)
+    await API.post("/api/scores/highscore",{time, gameStatus, difficulty},
       {
-        params: {time, gameStatus, difficulty},
         headers: {Authorization: `Bearer ${token}`}
       }
     )
@@ -23,9 +23,8 @@ export const useSubmitScore = async(time, gameStatus, difficulty ) => {
 export const getHighScore = async(difficulty) => {
   try {
     const token = localStorage.getItem("access_token");
-    const response = await API.get("/api/scores/user-score", 
+    const response = await API.get("/api/scores/user-score",{difficulty},
       {
-        params: {difficulty},
         headers: {Authorization: `Bearer ${token}`}
       }
     );
