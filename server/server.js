@@ -3,10 +3,12 @@ import dotenv from "dotenv"
 import cors from "cors"
 import authRoutes from "./apps/authentication/authRoutes.js"
 import scoresRoutes from "./apps/scores/scoresRoutes.js"
+import cookieParser from "cookie-parser"
 dotenv.config()
 const app = express()
 const PORT = process.env.PORT;
 
+app.use(cookieParser())
 app.use(express.json())
 app.use(cors({
     origin: process.env.CLIENT_URL,

@@ -5,11 +5,28 @@ class AuthController {
     const { username,email, password } = req.body;
 
     try{
+        //Check if username exists
+        const{data: existingUser} = await supabase
+        .from("profiles")
+        .select("username")
+        .eq("username", username)
+        .maybeSingle();
+
+        console.log(existingUser)
+        if(existingUser){
+          throw new Error("Username already exists")
+        }
+
         //Create user in Supabase Auth
         const{data: authData, error: authError} = await supabase.auth.signUp({
             email,
             password,
-            email_verified: true
+            email_verified: true,
+            options: {
+              data: {
+                display_name: username
+              }
+            }
         });
         if(authError) throw authError;
 
@@ -21,7 +38,7 @@ class AuthController {
         .insert([{id: userId, username, email}]);
             if (profileError) throw profileError;
 
-    res.status(201).json({ message: "User signed up!", user: authData.user });
+    res.status(201).json({ message: "User signed up!"});
     }catch(error){
         res.status(400).json({ error: error.message || error });
     }
