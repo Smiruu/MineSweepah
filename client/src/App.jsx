@@ -3,10 +3,13 @@ import "./App.css";
 import HomeScreen from "./screens/HomeScreen";
 import LoginScreen from "./screens/LoginScreen";
 import RegisterScreen from "./screens/RegisterScreen";
+import { AuthProvider } from "./context/authProvider";
 
 function App() {
   return (
+    
     <div className="app-bg flex items-center justify-center">
+      <AuthProvider>
       <Router>
         <Routes>
           <Route path="/home" element={<HomeScreen />} />
@@ -14,7 +17,9 @@ function App() {
           <Route path="/signup" element={<RegisterScreen />} />
         </Routes>
       </Router>
+      </AuthProvider>
     </div>
+    
   );
 }
 

@@ -5,6 +5,7 @@ import { getHighScore, useSubmitScore } from "../hooks/scoreHooks";
 import Leaderboard from "../components/Homescreen/Leaderboard";
 import { useNavigate } from "react-router-dom";
 
+import { useAuthProvider } from "../context/authProvider";
 
 const DIFFICULTY_OPTIONS = ["easy", "medium", "hard"];
 
@@ -16,45 +17,45 @@ function HomeScreen() {
   const [highScore, setHighScore] = useState(0);
   const [gameCycle, setGameCycle] = useState(0); // 🔑 trigger refresh
   const [time, setTime] = useState(0);
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-  
-  useEffect(() => {
-  const saveScore = async () => {
-    if (gameStatus === "won") {
-      console.log("Auto-saving high score");
-      setLoading(true);
-      try {
-        await useSubmitScore(time, gameStatus, difficulty);
-        setGameCycle((prev) => prev + 1); // refresh leaderboard & highscore
-      } catch (error) {
-        setError(error);
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  saveScore();
-}, [gameStatus]);
-  const handlePlayAgain = async() => {    
+  const { user, userLoading } = useAuthProvider();
+
+  useEffect(() => {
+    const saveScore = async () => {
+      if (gameStatus === "won") {
+        console.log("Auto-saving high score");
+        setLoading(true);
+        try {
+          await useSubmitScore(time, difficulty);
+          setGameCycle((prev) => prev + 1); // refresh leaderboard & highscore
+        } catch (error) {
+          setError(error);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    saveScore();
+  }, [gameStatus]);
+  const handlePlayAgain = async () => {
     setBoardKey((prev) => prev + 1);
     setGameStatus("playing");
     setGameCycle((prev) => prev + 1); // trigger refresh for leaderboard & highscore
   };
 
-  useEffect(() =>{
-    const access_token = localStorage.getItem("access_token")
-    if(!access_token){
-      navigate("/")
+  useEffect(() => {
+    if (!user && !userLoading) {
+      navigate("/");
     }
-  })
+  }, []);
 
   useEffect(() => {
     const fetchHighScore = async () => {
       try {
         const data = await getHighScore(difficulty);
-        console.log("User high score:", data.score.high_score);
         setHighScore(data.score.high_score);
       } catch (err) {
         console.error(err.message);
@@ -63,17 +64,15 @@ function HomeScreen() {
     fetchHighScore();
   }, [difficulty, gameCycle]); // 🔑 refetch when difficulty or play again changes
 
-
-
   return (
     <div className="min-h-screen">
       {/* Navbar at top */}
       <Navbar />
 
       {/* Main two-column layout */}
-      <div className="flex flex-row items-start gap-8 px-8 py-6">
-        {/* Left column */}
-        <div className="flex-1 flex flex-col items-center gap-6">
+<div className="flex flex-col lg:flex-row items-stretch gap-8 px-4 sm:px-6 lg:px-8 py-6 min-h-screen">
+  {/* Left column */}
+  <div className="flex-1 flex flex-col items-center gap-6">
           {/* High Score Card */}
           <div className="w-full max-w-sm bg-gray-800/70 shadow-lg rounded-2xl p-4 text-center border-2 border-blue-500">
             <h1 className="text-xl font-bold text-green-400">🏆 High Score</h1>
@@ -107,17 +106,20 @@ function HomeScreen() {
                 >
                   {gameStatus === "lost" ? "💥 Boom! You Lost" : "🎉 You Won!"}
                 </h2>
-<button
-  onClick={handlePlayAgain}
-  disabled={loading} // 🔒 disable button while saving
-  className={`mt-2 px-4 py-2 rounded w-full text-white ${
-    loading
-      ? "bg-gray-400 cursor-not-allowed" // 🔒 disabled style
-      : "bg-green-500 hover:bg-green-600"
-  }`}
->
-  {loading ? "Saving score..." : "Play Again"}
-</button>
+                <button
+                  onClick={handlePlayAgain}
+                  disabled={loading} // 🔒 disable button while saving
+                  className={`mt-2 px-4 py-2 rounded w-full text-white ${
+                    loading
+                      ? "bg-gray-400 cursor-not-allowed" // 🔒 disabled style
+                      : "bg-green-500 hover:bg-green-600"
+                  }`}
+                >
+                  {loading ? "Saving score..." : "Play Again"}
+                  {error && (
+                    <p className="text-red-400 text-sm mt-2">{error}</p>
+                  )}
+                </button>
               </div>
             </div>
           )}
@@ -146,9 +148,9 @@ function HomeScreen() {
         </div>
 
         {/* Right column (Leaderboard) */}
-        <div className="w-80">
-          <Leaderboard difficulty={difficulty} gameCycle={gameCycle} />
-        </div>
+        <div className="w-full lg:w-100 flex justify-center">
+    <Leaderboard difficulty={difficulty} gameCycle={gameCycle} user={user} />
+  </div>
       </div>
     </div>
   );

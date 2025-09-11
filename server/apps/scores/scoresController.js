@@ -6,6 +6,7 @@ class ScoresController {
     try {
 
     const { time, difficulty } = req.body;
+
     const user_id = req.user.id; 
 
 
@@ -63,7 +64,7 @@ class ScoresController {
   // Get leaderboard (top 10 per difficulty)
 static getLeaderboard = async (req, res) => {
   try {
-    const { difficulty } = req.query;
+    const {difficulty}  = req.query;
     const user_id = req.user?.id;
 
     if (!difficulty) {

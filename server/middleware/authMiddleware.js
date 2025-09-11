@@ -1,19 +1,40 @@
 import {supabase} from "../database/supabase.js";
 
 export async function authMiddleware(req, res, next) {
-  const token = req.headers.authorization?.replace("Bearer ", "");
-  
-  if (!token) return res.status(401).json({ error: "No token provided" });
+  const access_token = req.cookies["access_token"];
+  const refresh_token =  req.cookies["refresh_token"];
 
+  if (!access_token) return res.status(401).json({ error: "Not logged in" });
 
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser(token);
+  const {data, error} = await supabase.auth.getUser(access_token);
 
+  if (error && refresh_token){
+    //refresh the access token
+    const {data: newSession, error: refreshError } = await supabase.auth.setSession({
+      refresh_token: refresh_token,
+      access_token: access_token
+    });
 
-  if (error || !user) return res.status(401).json({ error: "Invalid token" });
+    if(refreshError) {
+      return res.status(401).json({error: "Session Expired, Please Log in Again"});
+    }
 
-  req.user = user;
+    res.cookie("access_token", newSession.session.access_token,{
+       httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "none",
+          maxAge: 1000 * 60 * 60 * 1
+    });
+    res.cookie("refresh_token", newSession.session.refresh_token,{
+      httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "none"
+    })
+
+    req.user = newSession.user;
+    return next();
+  }
+
+  req.user = data.user;
   next();
-}
+};

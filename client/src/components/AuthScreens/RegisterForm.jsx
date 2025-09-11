@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { useAuth } from "../../hooks/authHooks"; // adjust path if needed
+
 import { useNavigate } from "react-router-dom";
+import { useAuthProvider } from "../../context/authProvider";
 
 function RegisterForm() {
-  const { register, loading, error, user } = useAuth();
+  const { register, loading, error, user, userLoading} = useAuthProvider();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [localError, setLocalError] = useState("");
   const navigate = useNavigate();
+
+ 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,14 +24,18 @@ function RegisterForm() {
 
     setLocalError("");
     await register(username, email, password);
+    if(!error){
+          navigate("/home")
+    }
   };
 
   // Redirect when registered
   useEffect(() => {
-    if (user) {
-      navigate("/");
-    }
-  }, [user, navigate]);
+  if(user && !userLoading){
+    navigate("/home")
+  }
+
+  }, [navigate]);
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col space-y-5">

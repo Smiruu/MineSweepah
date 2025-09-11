@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { getLeaderboard } from "../../hooks/scoreHooks";
 
-function Leaderboard({ difficulty, gameCycle }) {
+function Leaderboard({ difficulty, gameCycle, user}) {
   const [leaderboard, setLeaderboard] = useState([]);
 
-  const currentUser = JSON.parse(localStorage.getItem("user"));
+  const currentUser = user;
 
   useEffect(() => {
     const fetchLeaderboard = async () => {
+      setLeaderboard([])
       try {
         const data = await getLeaderboard(difficulty);
         setLeaderboard(data.leaderboard);

@@ -3,16 +3,15 @@ import axios from "axios";
 
 const API = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
+  withCredentials: true,
 });
 
-export const useSubmitScore = async(time, gameStatus, difficulty ) => {
+export const useSubmitScore = async(time, difficulty ) => {
   try {
-    const token = localStorage.getItem("access_token")
-    console.log(token)
-    await API.post("/api/scores/highscore",{time, gameStatus, difficulty},
-      {
-        headers: {Authorization: `Bearer ${token}`}
-      }
+
+    await API.post("/api/scores/highscore",{time, difficulty},{
+      withCredentials: "include",
+    }
     )
 
   } catch (err) {
@@ -22,11 +21,11 @@ export const useSubmitScore = async(time, gameStatus, difficulty ) => {
 
 export const getHighScore = async(difficulty) => {
   try {
-    const token = localStorage.getItem("access_token");
-    const response = await API.get("/api/scores/user-score",{difficulty},
+    const response = await API.get("/api/scores/user-score",
       {
-        headers: {Authorization: `Bearer ${token}`}
-      }
+      withCredentials: "include",
+      params: { difficulty}
+    }
     );
     return response.data
   } catch (err) {
@@ -40,14 +39,13 @@ export const getHighScore = async(difficulty) => {
 
 export const getLeaderboard = async(difficulty) => {
   try{
-    const token = localStorage.getItem("access_token");
+
     const response = await API.get("/api/scores/leaderboard",
       {
-        params:{difficulty},
-        headers: {Authorization: `Bearer ${token}`}
-      }
+      withCredentials: "include",
+      params: {difficulty}
+    }
     );
-    console.log(response.data)
     return response.data
   } catch(err){
     

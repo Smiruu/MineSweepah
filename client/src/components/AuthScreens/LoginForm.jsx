@@ -1,24 +1,30 @@
 import React, { useState, useEffect } from "react";
-import { useAuth } from "../../hooks/authHooks"; // adjust path if needed
+
 import { useNavigate } from "react-router-dom";
+import { useAuthProvider } from "../../context/authProvider";
 
 function LoginForm() {
-  const { login, loading, error, user } = useAuth(); // make sure your hook exposes `user` or session
+
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
+  const{ user, login, loading, error, userLoading} = useAuthProvider();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     await login(identifier, password);
-    
+    if(!error){
+          navigate("/home")
+          
+    }
+    console.log(error)
+    console.log(user)
   };
 
   // Redirect when logged in
   useEffect(() => {
-  const access_token = localStorage.getItem("access_token")
-
-  if(access_token){
+  if(user && !userLoading){
     navigate("/home")
   }
 
