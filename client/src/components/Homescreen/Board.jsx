@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { generateEmptyBoard, revealEmpty, revealAllMines, formatTime, placeMines} from "../../utils";
 import Cell from "./Cell";
 
-import {  useSubmitScore } from "../../hooks/scoreHooks";
+
 
 
 const DIFFICULTY = {

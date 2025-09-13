@@ -1,8 +1,9 @@
 import {supabase} from "../database/supabase.js";
 
 export async function authMiddleware(req, res, next) {
-  const access_token = req.cookies["access_token"];
+  const access_token = req.headers.authorization?.split(" ")[1];
   const refresh_token =  req.cookies["refresh_token"];
+
 
   if (!access_token) return res.status(401).json({ error: "Not logged in" });
 
@@ -10,9 +11,9 @@ export async function authMiddleware(req, res, next) {
 
   if (error && refresh_token){
     //refresh the access token
-    const {data: newSession, error: refreshError } = await supabase.auth.setSession({
+    const {data: newSession, error: refreshError } = await supabase.auth.refreshSession({
       refresh_token: refresh_token,
-      access_token: access_token
+
     });
 
     if(refreshError) {

@@ -4,7 +4,7 @@ import Navbar from "../components/Navbar";
 import { getHighScore, useSubmitScore } from "../hooks/scoreHooks";
 import Leaderboard from "../components/Homescreen/Leaderboard";
 import { useNavigate } from "react-router-dom";
-
+import { formatTime } from "../utils";
 import { useAuthProvider } from "../context/authProvider";
 
 const DIFFICULTY_OPTIONS = ["easy", "medium", "hard"];
@@ -20,7 +20,7 @@ function HomeScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const { user, userLoading } = useAuthProvider();
+  const { user, userLoading, accessToken, authReady } = useAuthProvider();
 
   useEffect(() => {
     const saveScore = async () => {
@@ -28,7 +28,7 @@ function HomeScreen() {
         console.log("Auto-saving high score");
         setLoading(true);
         try {
-          await useSubmitScore(time, difficulty);
+          await useSubmitScore(time, difficulty, accessToken);
           setGameCycle((prev) => prev + 1); // refresh leaderboard & highscore
         } catch (error) {
           setError(error);
@@ -53,16 +53,17 @@ function HomeScreen() {
   }, []);
 
   useEffect(() => {
+    if (!accessToken || !authReady) return;
     const fetchHighScore = async () => {
       try {
-        const data = await getHighScore(difficulty);
+        const data = await getHighScore(difficulty, accessToken);
         setHighScore(data.score.high_score);
       } catch (err) {
         console.error(err.message);
       }
     };
     fetchHighScore();
-  }, [difficulty, gameCycle]); // 🔑 refetch when difficulty or play again changes
+  }, [difficulty, gameCycle, accessToken, authReady]); // 🔑 refetch when difficulty or play again changes
 
   return (
     <div className="min-h-screen">
@@ -70,14 +71,14 @@ function HomeScreen() {
       <Navbar />
 
       {/* Main two-column layout */}
-<div className="flex flex-col lg:flex-row items-stretch gap-8 px-4 sm:px-6 lg:px-8 py-6 min-h-screen">
-  {/* Left column */}
-  <div className="flex-1 flex flex-col items-center gap-6">
+      <div className="flex flex-col lg:flex-row items-stretch gap-8 px-4 sm:px-6 lg:px-8 py-6 min-h-screen">
+        {/* Left column */}
+        <div className="flex-1 flex flex-col items-center gap-6">
           {/* High Score Card */}
           <div className="w-full max-w-sm bg-gray-800/70 shadow-lg rounded-2xl p-4 text-center border-2 border-blue-500">
             <h1 className="text-xl font-bold text-green-400">🏆 High Score</h1>
             <p className="text-3xl font-extrabold text-green-400 mt-2">
-              {highScore}
+              {formatTime(highScore)}
             </p>
             <p className="text-sm text-gray-500 mt-1">
               Difficulty:{" "}
@@ -149,8 +150,14 @@ function HomeScreen() {
 
         {/* Right column (Leaderboard) */}
         <div className="w-full lg:w-100 flex justify-center">
-    <Leaderboard difficulty={difficulty} gameCycle={gameCycle} user={user} />
-  </div>
+          <Leaderboard
+            difficulty={difficulty}
+            gameCycle={gameCycle}
+            user={user}
+            access={accessToken}
+            authReady={authReady}
+          />
+        </div>
       </div>
     </div>
   );

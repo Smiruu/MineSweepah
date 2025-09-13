@@ -1,23 +1,31 @@
 import React, { useState, useEffect } from "react";
 import { getLeaderboard } from "../../hooks/scoreHooks";
+import { formatTime } from "../../utils";
 
-function Leaderboard({ difficulty, gameCycle, user}) {
+function Leaderboard({ difficulty, gameCycle, user, access, authReady}) {
   const [leaderboard, setLeaderboard] = useState([]);
 
   const currentUser = user;
 
+
+
   useEffect(() => {
+    if(!access || !authReady) return;
+    
     const fetchLeaderboard = async () => {
       setLeaderboard([])
+      const access_token = access
+      console.log("Fetching leaderboard for", difficulty);
       try {
-        const data = await getLeaderboard(difficulty);
+        const data = await getLeaderboard(difficulty, access_token);
         setLeaderboard(data.leaderboard);
       } catch (err) {
+        
         console.error(err.message);
       }
     };
     fetchLeaderboard();
-  }, [difficulty, gameCycle]);
+  }, [difficulty, gameCycle, access, authReady]);
 
   return (
     <div className="bg-white shadow-lg rounded-2xl p-4 border-2 border-yellow-500">
@@ -46,7 +54,7 @@ function Leaderboard({ difficulty, gameCycle, user}) {
                     {isCurrentUser ? "You" : entry.profiles?.username || "Anonymous"}
                   </span>
                 </span>
-                <span className="font-bold">{entry.high_score}</span>
+                <span className="font-bold">{formatTime(entry.high_score)}</span>
               </li>
             );
           })}

@@ -8,4 +8,5 @@ router.post("/signup", AuthController.userRegister)
 router.post("/login", AuthController.userLogin)
 router.post("/logout", AuthController.userLogout)
 router.get("/user", authMiddleware, AuthController.getUser)
+router.get("/refresh", AuthController.refreshToken)
 export default router;

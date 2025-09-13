@@ -1,17 +1,19 @@
 import axios from "axios";
-
+import { AuthProvider } from "../context/authProvider";
 
 const API = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
   withCredentials: true,
 });
 
-export const useSubmitScore = async(time, difficulty ) => {
+export const useSubmitScore = async(time, difficulty, access_token ) => {
   try {
-
+ 
     await API.post("/api/scores/highscore",{time, difficulty},{
       withCredentials: "include",
-    }
+      headers: {
+        Authorization: `Bearer ${access_token}`
+    }},
     )
 
   } catch (err) {
@@ -19,12 +21,16 @@ export const useSubmitScore = async(time, difficulty ) => {
   }
 };
 
-export const getHighScore = async(difficulty) => {
+export const getHighScore = async(difficulty, access_token) => {
   try {
+    
     const response = await API.get("/api/scores/user-score",
       {
       withCredentials: "include",
-      params: { difficulty}
+      params: { difficulty},
+      headers: {
+        Authorization: `Bearer ${access_token}`
+    }
     }
     );
     return response.data
@@ -37,15 +43,19 @@ export const getHighScore = async(difficulty) => {
   }
 }
 
-export const getLeaderboard = async(difficulty) => {
+export const getLeaderboard = async(difficulty, accessToken) => {
   try{
-
+    
     const response = await API.get("/api/scores/leaderboard",
       {
       withCredentials: "include",
-      params: {difficulty}
+      params: {difficulty},
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+    }
     }
     );
+    console.log("Leaderboard data:", response.data);
     return response.data
   } catch(err){
     
