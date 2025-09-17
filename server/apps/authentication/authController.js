@@ -111,11 +111,6 @@ class AuthController {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
 
-      res.clearCookie("access_token", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    });
 
     res.clearCookie("refresh_token", {
       httpOnly: true,
@@ -131,13 +126,15 @@ class AuthController {
 
   static getUser = async (req,res) => {
     try {
+      console.log("Fetching user profile for user ID:", req.user.id);
       const {data:profile, error} = await supabase
       .from("profiles")
       .select("id, username, email")
       .eq("id", req.user.id)
-      .single();
+      .maybeSingle();
       if(error) throw error
-      res.status(200).json({user:profile})
+      console.log("Fetched user profile:", profile)
+      res.status(200).json({profile})
     } catch (error) {
        res.status(400).json({error: error.message || error})
     }
@@ -146,6 +143,7 @@ class AuthController {
   static refreshToken = async(req,res) => {
     
     try {
+      console.log("Refreshing token...", req.cookies);
       const token = req.cookies["refresh_token"];
       const {data, error} = await supabase.auth.refreshSession({refresh_token: token});
       
@@ -158,7 +156,7 @@ class AuthController {
         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         maxAge: 1000 * 60 * 60 * 1,
       });
-
+      console.log(data)
       res.status(200).json({message: "Token Refreshed", access_token: data.session.access_token});
     }catch(error){
 

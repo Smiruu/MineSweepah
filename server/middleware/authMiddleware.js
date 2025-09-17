@@ -20,18 +20,14 @@ export async function authMiddleware(req, res, next) {
       return res.status(401).json({error: "Session Expired, Please Log in Again"});
     }
 
-    res.cookie("access_token", newSession.session.access_token,{
-       httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "none",
-          maxAge: 1000 * 60 * 60 * 1
-    });
+    const newAccessToken = newSession.session.access_token;
     res.cookie("refresh_token", newSession.session.refresh_token,{
       httpOnly: true,
           secure: process.env.NODE_ENV === "production",
           sameSite: "none"
     })
-
+    
+    res.body = { access_token: newAccessToken };
     req.user = newSession.user;
     return next();
   }

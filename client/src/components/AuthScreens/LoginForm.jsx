@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 
 import { useNavigate } from "react-router-dom";
 import { useAuthProvider } from "../../context/authProvider";
+import { use } from "react";
 
 function LoginForm() {
 
@@ -14,21 +15,17 @@ function LoginForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     await login(identifier, password);
-    if(!error){
-          navigate("/home")
-          
-    }
-    console.log(error)
-    console.log(user)
+    
   };
 
   // Redirect when logged in
   useEffect(() => {
   if(user && !userLoading){
+    console.log(user, userLoading)
     navigate("/home")
   }
 
-  }, [navigate]);
+  }, [navigate, user]);
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col space-y-5">

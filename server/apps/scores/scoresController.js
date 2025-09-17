@@ -67,7 +67,7 @@ static getLeaderboard = async (req, res) => {
     const {difficulty}  = req.query;
     const user_id = req.user?.id;
 
-    console.log("Getting leaderboard for difficulty:", difficulty, "and user_id:", user_id);
+
     if (!difficulty) {
       return res.status(400).json({ error: "difficulty is required" });
     }
@@ -120,6 +120,7 @@ static getLeaderboard = async (req, res) => {
       }
     }
 
+  
     return res.status(200).json({ leaderboard, user: userEntry });
   } catch (error) {
  
