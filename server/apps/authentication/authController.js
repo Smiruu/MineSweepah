@@ -134,7 +134,7 @@ class AuthController {
       .maybeSingle();
       if(error) throw error
       console.log("Fetched user profile:", profile)
-      res.status(200).json({profile})
+      res.status(200).json({user:profile})
     } catch (error) {
        res.status(400).json({error: error.message || error})
     }
